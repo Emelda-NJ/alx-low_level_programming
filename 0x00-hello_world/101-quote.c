@@ -2,9 +2,9 @@
 #include <unistd.h>
 
 /**
- * main - The main() function is the entry point to a program.
+ * main - The main() function is the entry point.
  *
- * Return: terminates the main() function and returns the value 1 to mean successful
+ * Return: terminates the main() function and returns the 1 to mean successful
  */
 
 int main(void)
