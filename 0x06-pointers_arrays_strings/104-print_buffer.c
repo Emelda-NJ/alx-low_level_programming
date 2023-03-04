@@ -23,7 +23,7 @@ void print_buffer(char *b, int size)
 				printf("  ");
 
 			else
-				printf("%02x", *(a + i + a));
+				printf("%02x", *(b + i + a));
 
 			if ((i % 2) != 0 && i != 0)
 				printf(" ");
