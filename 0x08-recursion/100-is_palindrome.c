@@ -13,7 +13,7 @@ int find_strlen(char *s)
 
 	if (*(s + l))
 	{
-		length++;
+		l++;
 		l += find_strlen(s + l);
 	}
 
