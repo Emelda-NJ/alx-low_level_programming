@@ -3,27 +3,10 @@
 #include <stdio.h>
 
 /**
- * _strlen - Finds the length of a string.
- * @str: The string to be measured.
- *
- * Return: The length of the string.
- */
-int _strlen(char *str)
-{
-	int len = 0;
-
-	while (*str++)
-		len++;
-
-	return (len);
-}
-
-/**
  * _puts - prints a string, followed by a new line,
  * @str: pointer to the string to print
  * Return: void
 */
-
 
 void _puts(char *str)
 {
