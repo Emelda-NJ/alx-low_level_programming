@@ -1,6 +1,11 @@
 #include "main.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+char *create_buffer(char *file);
+void close_file(int fd);
 
 /**
  * create_buffer - a function that allocates 1024 bytes for a buffer.
@@ -25,16 +30,16 @@ char *create_buffer(char *file)
 
 /**
  * close_file - function that Closes file descriptors.
- * @des: The file descriptor to be closed.
+ * @fd: The file descriptor to be closed.
  */
-void close_file(int des)
+void close_file(int fd)
 {
 	int c;
 
-	c = close(des);
+	c = close(fd);
 	if (c == -1)
 	{
-		dprintf(STDERR_FILENO, "Error: Can't close des %d\n", des);
+		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd);
 		exit(100);
 	}
 }
