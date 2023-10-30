@@ -40,7 +40,7 @@ void close_file(int des)
 }
 
 /**
- * main_file - function that Copies the contents of a file to another file.
+ * main - function that Copies the contents of a file to another file.
  * @argc: The number of arguments supplied to the system.
  * @argv: An array of pointers to the arguments.
  * Return: 0 on success.
@@ -50,7 +50,7 @@ void close_file(int des)
  *              If file_to cannot be created or written to - exit code 99.
  *              If file_to or file_from cannot be closed - exit code 100.
  */
-int main_file(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	int from;
 	int to;
