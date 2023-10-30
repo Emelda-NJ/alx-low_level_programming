@@ -6,24 +6,33 @@ include "main.h"
  * read_textfile- function that reads & prints a text file to the POSIX stdout
  * @filename: the name of text file it should  read
  * @letters: the number of letters it should read and print
- * Return: w the actual number of letters it could read and print
+ * Return: the actual number of letters it could read and print
  *        and 0 when function fails.
  */
 ssize_t read_textfile(const char *filename, size_t letters)
-	{
-	char *buf;
-	ssize_t o;
-	ssize_t r;
-	ssize_t w;
+{
+	ssize_t o, r, w;
+	char *buffer;
+
+	if (filename == NULL)
+		return (0);
+
+	buffer = malloc(sizeof(char) * letters);
+	if (buffer == NULL)
+		return (0);
 
 	o = open(filename, O_RDONLY);
-	if (o == -1)
-	return (0);
-	buf = malloc(sizeof(char) * letters);
-	r = read(o, buf, letters);
-	w = write(STDOUT_FILENO, buf, r);
+	r = read(o, buffer, letters);
+	w = write(STDOUT_FILENO, buffer, r);
 
-	free(buf);
-	close(o);
-	return (w);
+	if (o == -1 || r == -1 || w == -1 || w != r)
+	{
+		free(buffer);
+		return (0);
 	}
+
+	free(buffer);
+	close(o);
+
+	return (w);
+}
