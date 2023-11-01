@@ -1,134 +1,100 @@
 #include "main.h"
-#include <elf.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-void check_elf(unsigned char *e_ident);
-void print_elf_header(char *filename);
-void close_elf(int elf);
-void read_elf_header(int elf, Elf64_Ehdr *header);
-void print_elf_info(Elf64_Ehdr *header);
 
 /**
- * check_elf - A function that checks if a file is an ELF file.
- * @e_ident: An array containing the ELF magic numbers.
- *
- * Description: If the file is not an ELF file - exit code 98.
+ * main - program entry point
+ * @argc: argument count
+ * @argv: argument vector
+ * Return: 1 if successfull, 0 if unsuccessfull
  */
-void check_elf(unsigned char *e_ident)
+int main(int argc, char *argv[])
 {
-	int index;
+	const char *filename = argv[1];
+	int fd = open(filename, O_RDONLY);
+	Elf64_Ehdr header;
+	ssize_t bytes_read = read(fd, &header, sizeof(header));
 
-	for (index = 0; index < 4; index++)
-{
-	if (e_ident[index] != 127 &&
-	e_ident[index] != 'E' &&
-	e_ident[index] != 'L' &&
-	e_ident[index] != 'F')
-{
-	dprintf(STDERR_FILENO, "Error: Not an ELF file\n");
-	exit(98);
-	}
-	}
-}
-/**
- * print_elf_header - A function that prints the ELF header info
- * @filename: The name of the ELF file.
- */
-void print_elf_header(char *filename)
-{
-	Elf64_Ehdr *header;
-	int elf;
-
-	elf = open(filename, O_RDONLY);
-	if (elf == -1)
+	if (argc != 2)
 	{
-	dprintf(STDERR_FILENO, "Error: Can't read file %s\n", filename);
-	exit(98);
+		fprintf(stderr, "Usage: %s elf_filename\n", argv[0]);
+		exit(98);
 	}
 
-	header = malloc(sizeof(Elf64_Ehdr));
-	if (header == NULL)
+	if (fd == -1)
 	{
-	close_elf(elf);
-	dprintf(STDERR_FILENO, "Error: Can't read file %s\n", filename);
-	exit(98);
+		fprintf(stderr, "Error opening file\n");
+		exit(98);
 	}
 
-	read_elf_header(elf, header);
-	print_elf_info(header);
+	if (bytes_read != sizeof(header))
+	{
+		fprintf(stderr, "Error reading ELF header\n");
+		close(fd);
+		exit(98);
+	}
 
-	free(header);
-	close_elf(elf);
+	if (_memcmp(header.e_ident, ELFMAG, SELFMAG) != 0)
+	{
+		fprintf(stderr, "Error: Not an ELF file\n");
+		close(fd);
+		exit(98);
+	}
+
+	print_elf_header(&header);
+
+	close(fd);
+	return (0);
 }
 
 /**
- * close_elf - A function that closes an ELF file.
- * @elf: The file descriptor of the ELF file.
- *
- * Description: If the file cannot be closed - exit code 98.
+ * print_elf_header - print elf format
+ * @header: elf header
+ * Return: void
  */
-void close_elf(int elf)
+void print_elf_header(const Elf64_Ehdr *header)
 {
-	if (close(elf) == -1)
-	{
-	dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", elf);
-	exit(98);
-	}
-}
+	int i;
 
-/**
- * read_elf_header - A function that reads the ELF header from a file.
- * @elf: The file descriptor of the ELF file.
- * @header: An Elf64_Ehdr structure to store the header.
- *
- * Description: If the read operation fails - exit code 98.
- */
-void read_elf_header(int elf, Elf64_Ehdr *header)
-{
-	int r;
-
-	r = read(elf, header, sizeof(Elf64_Ehdr));
-	if (r == -1)
-	{
-	close_elf(elf);
-	dprintf(STDERR_FILENO, "Error: Failed to read ELF header\n");
-	exit(98);
-	}
-}
-
-/**
- * print_elf_info - function that prints the info contained in the ELF header
- * @header: An Elf64_Ehdr structure representing the ELF header.
- */
-void print_elf_info(Elf64_Ehdr *header)
-{
-	check_elf(header->e_ident);
 	printf("ELF Header:\n");
+	printf("  Magic:   ");
+
+	for (i = 0; i < EI_NIDENT; ++i)
+		printf("%02x ", header->e_ident[i]);
+
+	printf("\n");
+	printf("  Class:                             %s\n",
+			(header->e_ident[EI_CLASS] == ELFCLASS64) ?
+			"ELF64" : "ELF32");
+	printf("  Data:                              %s\n",
+			(header->e_ident[EI_DATA] == ELFDATA2LSB) ?
+			"2's complement, little endian" :
+			"2's complement, big endian");
+	printf("  Version:                           %d (current)\n",
+			header->e_ident[EI_VERSION]);
+	printf("  OS/ABI:                            %s\n",
+			(header->e_ident[EI_OSABI] == ELFOSABI_SYSV) ?
+			"UNIX - System V" : "Others");
+	printf("  ABI Version:                       %d\n",
+			header->e_ident[EI_ABIVERSION]);
+	printf("  Type:                              EXEC (Executable file)\n");
+	printf("  Entry point address:               0x%lx\n",
+			(unsigned long)header->e_entry);
 }
 
 /**
- * main - The entry point into the program.
- * @argc: The number of arguments passed to the program.
- * @argv: An array of pointers to the arguments.
- *
- * Return: 0 on success.
- *
- * Description: If the file is not an ELF File or
- *		the function fails - exit code 98.
+ * _memcmp - copies memory area.
+ * @s1: memory destination
+ * @s2: memory source
+ * @n: number of bytes to copy from src
+ * Return: pointer to dest
  */
-int main(int __attribute__((__unused__)) argc, char *argv[])
+int _memcmp(unsigned char *s1, char *s2, unsigned int n)
 {
-	if (argc < 2)
-	{
-	printf("Usage: %s <filename>\n", argv[0]);
-	return (1);
-	}
+	unsigned int i;
 
-	print_elf_header(argv[1]);
+	for (i = 0; i < n; i++, s1++, s2++)
+	{
+		if (*s1 != *s2)
+			return (*s1 < *s2 ? -1 : 1);
+	}
 	return (0);
 }
