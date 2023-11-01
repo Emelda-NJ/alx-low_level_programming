@@ -1,3 +1,4 @@
+#include "main.h"
 #include <elf.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -13,8 +14,8 @@ void read_elf_header(int elf, Elf64_Ehdr *header);
 void print_elf_info(Elf64_Ehdr *header);
 
 /**
- * check_elf - Checks if a file is an ELF file.
- * @e_ident: A pointer to an array containing the ELF magic numbers.
+ * check_elf - A function that checks if a file is an ELF file.
+ * @e_ident: An array containing the ELF magic numbers.
  *
  * Description: If the file is not an ELF file - exit code 98.
  */
@@ -35,7 +36,7 @@ void check_elf(unsigned char *e_ident)
 	}
 }
 /**
- * print_elf_header - Prints the ELF header information.
+ * print_elf_header - A function that prints the ELF header info
  * @filename: The name of the ELF file.
  */
 void print_elf_header(char *filename)
@@ -66,7 +67,7 @@ void print_elf_header(char *filename)
 }
 
 /**
- * close_elf - Closes an ELF file.
+ * close_elf - A function that closes an ELF file.
  * @elf: The file descriptor of the ELF file.
  *
  * Description: If the file cannot be closed - exit code 98.
@@ -81,9 +82,9 @@ void close_elf(int elf)
 }
 
 /**
- * read_elf_header - Reads the ELF header from a file.
+ * read_elf_header - A function that reads the ELF header from a file.
  * @elf: The file descriptor of the ELF file.
- * @header: A pointer to an Elf64_Ehdr structure to store the header.
+ * @header: An Elf64_Ehdr structure to store the header.
  *
  * Description: If the read operation fails - exit code 98.
  */
@@ -101,8 +102,8 @@ void read_elf_header(int elf, Elf64_Ehdr *header)
 }
 
 /**
- * print_elf_info - Prints the information contained in the ELF header.
- * @header: A pointer to an Elf64_Ehdr structure representing the ELF header.
+ * print_elf_info - function that prints the info contained in the ELF header
+ * @header: An Elf64_Ehdr structure representing the ELF header.
  */
 void print_elf_info(Elf64_Ehdr *header)
 {
@@ -111,14 +112,14 @@ void print_elf_info(Elf64_Ehdr *header)
 }
 
 /**
- * main - The entry point of the program.
- * @argc: The number of arguments supplied to the program.
+ * main - The entry point into the program.
+ * @argc: The number of arguments passed to the program.
  * @argv: An array of pointers to the arguments.
  *
  * Return: 0 on success.
  *
  * Description: If the file is not an ELF File or
- * the function fails - exit code 98.
+ *		the function fails - exit code 98.
  */
 int main(int __attribute__((__unused__)) argc, char *argv[])
 {
