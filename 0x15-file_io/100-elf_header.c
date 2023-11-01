@@ -34,7 +34,6 @@ void check_elf(unsigned char *e_ident)
  */
 void print_elf_header(char *filename)
 {
-	Elf64_Ehdr *header;
 	int elf;
 
 	elf = open(filename, O_RDONLY);
@@ -44,18 +43,12 @@ void print_elf_header(char *filename)
 	exit(98);
 	}
 
-	header = malloc(sizeof(Elf64_Ehdr));
-	if (header == NULL)
-	{
-	close_elf(elf);
-	dprintf(STDERR_FILENO, "Error: Can't read file %s\n", filename);
-	exit(98);
-	}
+	Elf64_Ehdr header;
 
-	read_elf_header(elf, header);
-	print_elf_info(header);
+	read_elf_header(elf, &header);
 
-	free(header);
+	print_elf_info(&header);
+
 	close_elf(elf);
 }
 
@@ -115,9 +108,9 @@ void print_elf_info(Elf64_Ehdr *header)
  * Description: If the file is not an ELF File or
  *		the function fails - exit code 98.
  */
-int main(int __attribute__((__unused__)) argc, char *argv[])
+int main(int argc, char *argv[])
 {
-	if (argc < 2)
+	if (argc != 2)
 	{
 	printf("Usage: %s <filename>\n", argv[0]);
 	return (1);
