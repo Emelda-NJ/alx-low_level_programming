@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 void check_elf(unsigned char *e_ident);
 void print_elf_header(char *filename);
@@ -22,10 +21,18 @@ void print_elf_info(Elf64_Ehdr *header);
  */
 void check_elf(unsigned char *e_ident)
 {
-	if (memcmp(e_ident, ELFMAG, SELFMAG) != 0)
-	{
+	int index;
+
+	for (index = 0; index < 4; index++)
+{
+	if (e_ident[index] != 127 &&
+	e_ident[index] != 'E' &&
+	e_ident[index] != 'L' &&
+	e_ident[index] != 'F')
+{
 	dprintf(STDERR_FILENO, "Error: Not an ELF file\n");
 	exit(98);
+	}
 	}
 }
 /**
@@ -34,6 +41,7 @@ void check_elf(unsigned char *e_ident)
  */
 void print_elf_header(char *filename)
 {
+	Elf64_Ehdr *header;
 	int elf;
 
 	elf = open(filename, O_RDONLY);
@@ -43,12 +51,18 @@ void print_elf_header(char *filename)
 	exit(98);
 	}
 
-	Elf64_Ehdr header;
+	header = malloc(sizeof(Elf64_Ehdr));
+	if (header == NULL)
+	{
+	close_elf(elf);
+	dprintf(STDERR_FILENO, "Error: Can't read file %s\n", filename);
+	exit(98);
+	}
 
-	read_elf_header(elf, &header);
+	read_elf_header(elf, header);
+	print_elf_info(header);
 
-	print_elf_info(&header);
-
+	free(header);
 	close_elf(elf);
 }
 
@@ -85,7 +99,6 @@ void read_elf_header(int elf, Elf64_Ehdr *header)
 	dprintf(STDERR_FILENO, "Error: Failed to read ELF header\n");
 	exit(98);
 	}
-	check_elf(header->e_ident);
 }
 
 /**
@@ -108,9 +121,9 @@ void print_elf_info(Elf64_Ehdr *header)
  * Description: If the file is not an ELF File or
  *		the function fails - exit code 98.
  */
-int main(int argc, char *argv[])
+int main(int __attribute__((__unused__)) argc, char *argv[])
 {
-	if (argc != 2)
+	if (argc < 2)
 	{
 	printf("Usage: %s <filename>\n", argv[0]);
 	return (1);
